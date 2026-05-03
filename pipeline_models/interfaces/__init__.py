@@ -1,7 +1,9 @@
 from .video_input import VideoInput
-from .face_detector import FaceDetector
+from .pipeline_context import PipelineContext
+from .pipeline_step import PipelineStep
 
 __all__ = [
-    "VideoInput", 
-    "FaceDetector",
+    "VideoInput",
+    "PipelineContext",
+    "PipelineStep",
 ]

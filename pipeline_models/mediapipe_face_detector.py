@@ -1,62 +1,39 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-from typing import Optional, Tuple, Dict
+from typing import Optional
 
-from .interfaces.face_detector import FaceDetector
+from .interfaces.pipeline_step import PipelineStep
+from .interfaces.pipeline_context import PipelineContext
 
 
-class MediaPipeFaceDetector(FaceDetector):
-    """Реализация детекции лица через MediaPipe (очень быстрый)."""
+class MediaPipeFaceDetector(PipelineStep):
+    """Шаг пайплайна: детекция лица"""
 
     def __init__(self, min_detection_confidence: float = 0.85):
+        super().__init__(min_detection_confidence=min_detection_confidence)
         self.min_detection_confidence = min_detection_confidence
 
         self.mp_face_detection = mp.solutions.face_detection
         self.face_detection = self.mp_face_detection.FaceDetection(
-            model_selection=0,  # 0 — короткое расстояние, 1 — дальнее
+            model_selection=0,
             min_detection_confidence=min_detection_confidence
         )
 
-    def detect(self, frame: np.ndarray) -> Optional[Tuple[int, int, int, int]]:
-        """Простая детекция — возвращает (x, y, w, h)"""
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = self.face_detection.process(rgb_frame)
+    def process(self, context: PipelineContext) -> PipelineContext:
+        rgb = cv2.cvtColor(context.frame, cv2.COLOR_BGR2RGB)
+        results = self.face_detection.process(rgb)
 
-        if not results.detections:
-            return None
+        if results.detections:
+            detection = results.detections[0]
+            bbox = detection.location_data.relative_bounding_box
+            h, w, _ = context.frame.shape
 
-        # Берём первое (самое уверенное) лицо
-        detection = results.detections[0]
-        bbox = detection.location_data.relative_bounding_box
+            x = int(bbox.xmin * w)
+            y = int(bbox.ymin * h)
+            width = int(bbox.width * w)
+            height = int(bbox.height * h)
 
-        h, w, _ = frame.shape
-        x = int(bbox.xmin * w)
-        y = int(bbox.ymin * h)
-        width = int(bbox.width * w)
-        height = int(bbox.height * h)
+            context.face_bbox = (x, y, width, height)
 
-        return x, y, width, height
-
-    def detect_with_landmarks(self, frame: np.ndarray) -> Optional[Dict]:
-        """Полная информация + ключевые точки"""
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        results = self.face_detection.process(rgb_frame)
-
-        if not results.detections:
-            return None
-
-        detection = results.detections[0]
-        bbox = detection.location_data.relative_bounding_box
-
-        h, w, _ = frame.shape
-        x = int(bbox.xmin * w)
-        y = int(bbox.ymin * h)
-        width = int(bbox.width * w)
-        height = int(bbox.height * h)
-
-        return {
-            "bbox": (x, y, width, height),
-            "confidence": detection.score[0],
-            "landmarks": detection.location_data.relative_keypoints  # 6 точек
-        }
+        return context
