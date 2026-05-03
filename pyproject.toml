@@ -1,6 +1,6 @@
 [project]
 name = "biometric-face-preprocessor"
-version = "0.1.1"
+dynamic = ["version"]
 description = "Пайплайн предобработки видео для НПБК по ГОСТ Р 52633"
 authors = [{ name = "KuznetsovMR", email = "marselkuznetsov@yandex.ru" }]
 requires-python = ">=3.9"
@@ -13,6 +13,10 @@ dependencies = [
 [build-system]
 requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev"
+local_scheme = "no-local-version"
 
 [tool.setuptools.packages.find]
 where = ["."]
