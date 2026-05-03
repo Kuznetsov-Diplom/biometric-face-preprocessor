@@ -10,8 +10,17 @@ dependencies = [
     "mediapipe>=0.10",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.6.0",      # быстрый линтер + форматтер
+    "black>=24.8.0",    # красивый форматтер
+    "mypy>=1.11.0",     # проверка типов
+    "pytest>=8.0",      # тесты
+    "pytest-cov>=5.0",  # покрытие кода
+]
+
 [build-system]
-requires = ["setuptools>=45", "wheel"]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=7.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
