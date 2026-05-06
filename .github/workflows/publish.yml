@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # обязательно для setuptools_scm (динамическая версия)
+          fetch-depth: 0
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -36,4 +36,4 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
-        run: python -m twine upload --repository-url "https://pypi.pkg.github.com/${{ github.repository }}/" dist/*
+        run: python -m twine upload --repository-url "https://pypi.pkg.github.com/${{ github.repository_owner }}/" dist/*
