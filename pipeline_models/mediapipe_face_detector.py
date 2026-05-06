@@ -1,10 +1,8 @@
 import cv2
 import mediapipe as mp
-import numpy as np
-from typing import Optional
 
-from .interfaces.pipeline_step import PipelineStep
 from .interfaces.pipeline_context import PipelineContext
+from .interfaces.pipeline_step import PipelineStep
 
 
 class MediaPipeFaceDetector(PipelineStep):
@@ -16,8 +14,7 @@ class MediaPipeFaceDetector(PipelineStep):
 
         self.mp_face_detection = mp.solutions.face_detection
         self.face_detection = self.mp_face_detection.FaceDetection(
-            model_selection=0,
-            min_detection_confidence=min_detection_confidence
+            model_selection=0, min_detection_confidence=min_detection_confidence
         )
 
     def process(self, context: PipelineContext) -> PipelineContext:

@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from .pipeline_context import PipelineContext
 
 

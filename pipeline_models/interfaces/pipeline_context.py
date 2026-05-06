@@ -1,13 +1,15 @@
 from dataclasses import dataclass, field
-from typing import Optional, Any
+from typing import Any, Optional
+
 import numpy as np
 
 
 @dataclass
 class PipelineContext:
     """Объект, который путешествует по всем шагам пайплайна"""
+
     frame_idx: int
-    frame: np.ndarray                     # BGR изображение
+    frame: np.ndarray  # BGR изображение
 
     # Результаты работы предыдущих шагов
     face_bbox: Optional[tuple[int, int, int, int]] = None
@@ -18,9 +20,9 @@ class PipelineContext:
 
     # Новые поля специально под демо-сайт (пока заполняются детектором)
     confidence: float = 0.0
-    inter_pupil_distance: float = 0.0     # будет заполняться в следующем шаге
+    inter_pupil_distance: float = 0.0  # будет заполняться в следующем шаге
     roi_size: tuple[int, int] = (0, 0)
-    stabilization: float = 0.0            # 0-100%
+    stabilization: float = 0.0  # 0-100%
     current_step: str = ""
 
     # Дополнительные метаданные

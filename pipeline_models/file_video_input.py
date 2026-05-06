@@ -1,6 +1,8 @@
+from collections.abc import Iterator
+from typing import Tuple
+
 import cv2
 import numpy as np
-from typing import Iterator, Tuple
 
 from .interfaces.video_input import VideoInput
 
@@ -23,8 +25,10 @@ class FileVideoInput(VideoInput):
         self._frame_count = int(self._cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
         print(f"📹 Открыт файл: {self.file_path}")
-        print(f"   Разрешение: {int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH))}×"
-              f"{int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))}")
+        print(
+            f"   Разрешение: {int(self._cap.get(cv2.CAP_PROP_FRAME_WIDTH))}×"
+            f"{int(self._cap.get(cv2.CAP_PROP_FRAME_HEIGHT))}"
+        )
         print(f"   FPS: {self._fps:.2f}, кадров: {self._frame_count}")
 
         frame_idx = 0

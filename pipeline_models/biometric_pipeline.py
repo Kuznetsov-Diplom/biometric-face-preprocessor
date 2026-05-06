@@ -1,9 +1,12 @@
-from typing import List, Optional, Iterator
+from collections.abc import Iterator
+from typing import List, Optional
+
+import cv2
+import numpy as np
+
 from .interfaces.pipeline_context import PipelineContext
 from .interfaces.pipeline_step import PipelineStep
 from .interfaces.video_input import VideoInput
-import cv2
-import numpy as np
 
 
 class BiometricPreprocessorPipeline:

@@ -1,13 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import Iterator, Any, Tuple
+from collections.abc import Iterator
+from typing import Any, Tuple
+
 import numpy as np
+
 
 class VideoInput(ABC):
     """Абстрактный базовый класс для источников видео (файл / камера)."""
 
     def __init__(self, source: Any):
         self.source = source
-        self._cap = None          # VideoCapture будет здесь
+        self._cap = None  # VideoCapture будет здесь
         self._frame_count = 0
         self._fps = 0.0
 
