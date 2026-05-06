@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Iterator
-from typing import Any, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -15,7 +15,7 @@ class VideoInput(ABC):
         self._fps = 0.0
 
     @abstractmethod
-    def get_video(self) -> Iterator[Tuple[int, np.ndarray]]:
+    def get_video(self) -> Iterator[tuple[int, np.ndarray]]:
         """Возвращает генератор: (номер_кадра, кадр)"""
         pass
 

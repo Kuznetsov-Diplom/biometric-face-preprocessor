@@ -1,5 +1,5 @@
 from collections.abc import Iterator
-from typing import List, Optional
+from typing import Optional
 
 import cv2
 import numpy as np
@@ -13,7 +13,7 @@ class BiometricPreprocessorPipeline:
     """Главный пайплайн — builder-style API"""
 
     def __init__(self):
-        self._steps: List[PipelineStep] = []
+        self._steps: list[PipelineStep] = []
         self._video_source: Optional[VideoInput] = None
 
     def add_step(self, step: PipelineStep) -> "BiometricPreprocessorPipeline":
@@ -25,7 +25,7 @@ class BiometricPreprocessorPipeline:
         return self
 
     @property
-    def steps(self) -> List[PipelineStep]:
+    def steps(self) -> list[PipelineStep]:
         """Для сайта — список шагов, чтобы переключать отображаемые слои"""
         return self._steps
 

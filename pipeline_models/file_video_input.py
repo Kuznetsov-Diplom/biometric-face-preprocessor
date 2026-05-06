@@ -1,5 +1,4 @@
 from collections.abc import Iterator
-from typing import Tuple
 
 import cv2
 import numpy as np
@@ -14,7 +13,7 @@ class FileVideoInput(VideoInput):
         super().__init__(source=file_path)
         self.file_path = file_path
 
-    def get_video(self) -> Iterator[Tuple[int, np.ndarray]]:
+    def get_video(self) -> Iterator[tuple[int, np.ndarray]]:
         """Генератор кадров из видеофайла."""
         self._cap = cv2.VideoCapture(self.file_path)
 
