@@ -15,6 +15,7 @@ class BiometricPreprocessorPipeline:
     def __init__(self):
         self._steps: list[PipelineStep] = []
         self._video_source: Optional[VideoInput] = None
+        self._preview_size = (640, 480)          # фиксированный размер для всех preview
 
     def add_step(self, step: PipelineStep) -> "BiometricPreprocessorPipeline":
         self._steps.append(step)
@@ -44,41 +45,39 @@ class BiometricPreprocessorPipeline:
                 break
         return context
 
-    def _center_image(self, small_img: np.ndarray, canvas_size: tuple[int, int]) -> np.ndarray:
-        """Центрирует 224×224 (или любое маленькое) изображение в большом canvas"""
-        h, w = small_img.shape[:2]
-        canvas_h, canvas_w = canvas_size
-
-        # Чёрный canvas того же размера, что и оригинальный кадр
+    def _center_image(self, img: np.ndarray) -> np.ndarray:
+        """Центрирует любое изображение (в т.ч. 448×448) в фиксированном canvas 640×480"""
+        h, w = img.shape[:2]
+        canvas_h, canvas_w = self._preview_size
         canvas = np.zeros((canvas_h, canvas_w, 3), dtype=np.uint8)
 
-        # Центрируем
         y_offset = (canvas_h - h) // 2
         x_offset = (canvas_w - w) // 2
 
-        canvas[y_offset:y_offset + h, x_offset:x_offset + w] = small_img
+        canvas[y_offset:y_offset + h, x_offset:x_offset + w] = img
         return canvas
 
     def get_preview_frame(self, context: PipelineContext, preview_step: str) -> np.ndarray:
-        """Возвращает картинку нужного шага + стабилизированный размер"""
+        """Всегда возвращает изображение одного размера → окно больше не летает"""
         if preview_step == "raw":
-            return context.frame.copy()
+            return cv2.resize(context.frame, self._preview_size)
 
         elif preview_step == "frame_preprocessing":
-            return context.frame.copy() if context.frame is not None else np.zeros((480, 640, 3), dtype=np.uint8)
+            return cv2.resize(context.frame, self._preview_size) if context.frame is not None else np.zeros((*self._preview_size, 3), dtype=np.uint8)
 
         elif preview_step == "face_detection":
-            return self.get_overlay_frame(context)
+            overlay = self.get_overlay_frame(context)
+            return cv2.resize(overlay, self._preview_size)
 
         elif preview_step == "geometric_normalization":
             if context.aligned_face is not None:
-                # Привязываем 224×224 к размеру оригинального кадра (чтобы не летало)
-                h, w = context.frame.shape[:2]
-                return self._center_image(context.aligned_face, (h, w))
-            return context.frame.copy()
+                # Увеличиваем до 448×448 — лицо становится крупным и стабильным
+                large_aligned = cv2.resize(context.aligned_face, (448, 448), interpolation=cv2.INTER_LINEAR)
+                return self._center_image(large_aligned)
+            return np.zeros((*self._preview_size, 3), dtype=np.uint8)
 
         # fallback
-        return self.get_overlay_frame(context)
+        return cv2.resize(self.get_overlay_frame(context), self._preview_size)
 
     def get_overlay_frame(self, context: PipelineContext) -> np.ndarray:
         """Оверлей bbox + 468 точек"""
