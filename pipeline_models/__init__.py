@@ -7,11 +7,15 @@ from .interfaces.pipeline_step import PipelineStep
 
 # Интерфейсы и базовые типы
 from .interfaces.video_input import VideoInput
+
+# Шаги пайплайна
+from .frame_preprocessor import FramePreprocessor
 from .mediapipe_face_detector import MediaPipeFaceDetector
 
 __all__ = [
     "FileVideoInput",
     "CameraVideoInput",
+    "FramePreprocessor",          # ← добавлено
     "MediaPipeFaceDetector",
     "BiometricPreprocessorPipeline",
     "VideoInput",
