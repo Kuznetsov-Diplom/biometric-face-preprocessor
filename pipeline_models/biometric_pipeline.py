@@ -45,12 +45,20 @@ class BiometricPreprocessorPipeline:
         return context
 
     def get_overlay_frame(self, context: PipelineContext) -> np.ndarray:
-        """Готовый кадр с зелёным оверлеем (bbox пока — остальное добавим позже)"""
+        """Готовый кадр с оверлеем: bbox + 468 ландмарков (зелёные точки)"""
         overlay = context.frame.copy()
+
+        # 1. Bbox
         if context.face_bbox:
             x, y, w, h = context.face_bbox
             cv2.rectangle(overlay, (x, y), (x + w, y + h), (0, 255, 0), 3)
-            # TODO: когда добавим landmarks — сюда же circles
+
+        # 2. 468 ландмарков (маленькие круги)
+        if context.landmarks and "points" in context.landmarks:
+            for (lx, ly) in context.landmarks["points"]:
+                cx, cy = int(lx), int(ly)
+                cv2.circle(overlay, (cx, cy), 1, (0, 255, 0), -1)  # зелёная точка
+
         return overlay
 
     def run(self, max_frames: Optional[int] = None) -> Iterator[PipelineContext]:
