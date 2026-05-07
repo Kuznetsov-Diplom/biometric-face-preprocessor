@@ -4,6 +4,7 @@ stages:
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
+  GIT_DEPTH: 0          # ← КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: полный клон + все теги
 
 cache:
   paths:
@@ -16,6 +17,8 @@ before_script:
   - python --version
   - pip install --upgrade pip
   - pip install build twine
+  # Дополнительная страховка (на случай, если GIT_DEPTH не сработает)
+  - git fetch --tags --force || true
 
 build:
   stage: build
@@ -26,7 +29,7 @@ build:
       - dist/
     expire_in: 1 week
 
-# Публикуем пакет в GitLab Package Registry ТОЛЬКО при создании тега (рекомендуемый способ)
+# Публикуем пакет в GitLab Package Registry ТОЛЬКО при создании тега
 publish:
   stage: publish
   script:
