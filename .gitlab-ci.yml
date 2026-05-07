@@ -16,12 +16,12 @@ default:
 before_script:
   - python --version
   - pip install --upgrade pip
-  - pip install build twine "setuptools_scm[toml]>=7.0"
+  - pip install build twine
   - git fetch --tags --force || true
   - echo "=== Git tags ==="
   - git tag --list
-  - echo "=== setuptools_scm detected version ==="
-  - python -m setuptools_scm
+  - echo "=== Version from _version.py ==="
+  - python -c "from _version import __version__; print(__version__)"
 
 build:
   stage: build
