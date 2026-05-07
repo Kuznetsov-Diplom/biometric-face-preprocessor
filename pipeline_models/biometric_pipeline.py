@@ -36,19 +36,31 @@ class BiometricPreprocessorPipeline:
         raise ValueError(f"Шаг {step_name} не найден")
 
     def process_single_frame(self, frame: np.ndarray, stop_after_step: Optional[str] = None) -> PipelineContext:
-        """Обрабатывает кадр до указанного шага (или до конца).
-        stop_after_step=None → полный пайплайн (как было раньше)"""
         context = PipelineContext(frame_idx=0, frame=frame.copy())
 
         for step in self._steps:
-            context = step(context)   # шаг вызывается как callable
+            context = step(context)
             if stop_after_step and step.name == stop_after_step:
-                break  # останавливаемся после нужного шага
-
+                break
         return context
 
+    def _center_image(self, small_img: np.ndarray, canvas_size: tuple[int, int]) -> np.ndarray:
+        """Центрирует 224×224 (или любое маленькое) изображение в большом canvas"""
+        h, w = small_img.shape[:2]
+        canvas_h, canvas_w = canvas_size
+
+        # Чёрный canvas того же размера, что и оригинальный кадр
+        canvas = np.zeros((canvas_h, canvas_w, 3), dtype=np.uint8)
+
+        # Центрируем
+        y_offset = (canvas_h - h) // 2
+        x_offset = (canvas_w - w) // 2
+
+        canvas[y_offset:y_offset + h, x_offset:x_offset + w] = small_img
+        return canvas
+
     def get_preview_frame(self, context: PipelineContext, preview_step: str) -> np.ndarray:
-        """Возвращает именно ту картинку, которую хочет видеть пользователь"""
+        """Возвращает картинку нужного шага + стабилизированный размер"""
         if preview_step == "raw":
             return context.frame.copy()
 
@@ -56,20 +68,20 @@ class BiometricPreprocessorPipeline:
             return context.frame.copy() if context.frame is not None else np.zeros((480, 640, 3), dtype=np.uint8)
 
         elif preview_step == "face_detection":
-            # после детекции — оригинальный кадр с оверлеем
             return self.get_overlay_frame(context)
 
         elif preview_step == "geometric_normalization":
-            # после выравнивания — aligned_face
             if context.aligned_face is not None:
-                return context.aligned_face.copy()
-            return context.frame.copy()  # fallback
+                # Привязываем 224×224 к размеру оригинального кадра (чтобы не летало)
+                h, w = context.frame.shape[:2]
+                return self._center_image(context.aligned_face, (h, w))
+            return context.frame.copy()
 
-        # по умолчанию — полный оверлей
+        # fallback
         return self.get_overlay_frame(context)
 
     def get_overlay_frame(self, context: PipelineContext) -> np.ndarray:
-        """Готовый кадр с оверлеем (bbox + 468 точек) — используется для face_detection"""
+        """Оверлей bbox + 468 точек"""
         overlay = context.frame.copy()
 
         if context.face_bbox:
