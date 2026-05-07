@@ -46,6 +46,7 @@ class MediaPipeFaceDetector(PipelineStep):
         context.confidence = 0.0
         context.face_bbox = None
         context.roi_size = (0, 0)
+        context.crop_offset = None
 
         if detection_results.detections:
             detection = detection_results.detections[0]
@@ -66,7 +67,7 @@ class MediaPipeFaceDetector(PipelineStep):
             if mesh_results.multi_face_landmarks:
                 landmarks = mesh_results.multi_face_landmarks[0]
 
-                # Сохраняем как dict для удобства (можно потом конвертировать в np.array)
+                # Сохраняем как dict
                 context.landmarks = {
                     "points": [(lm.x * w, lm.y * h) for lm in landmarks.landmark],
                     "count": 468
@@ -81,5 +82,6 @@ class MediaPipeFaceDetector(PipelineStep):
                 y2 = min(h, y + height + pad_y)
 
                 context.cropped_face = context.frame[y1:y2, x1:x2].copy()
+                context.crop_offset = (x1, y1)  # ← ключевой фикс «летающей камеры»
 
         return context
