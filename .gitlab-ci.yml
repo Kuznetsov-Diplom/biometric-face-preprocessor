@@ -4,7 +4,7 @@ stages:
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
-  GIT_DEPTH: 0                  # ← обязательно для setuptools_scm
+  GIT_DEPTH: 0
 
 cache:
   paths:
@@ -16,15 +16,19 @@ default:
 before_script:
   - python --version
   - pip install --upgrade pip
-  - pip install build twine
-  - git fetch --tags --force     # ← дополнительная страховка
+  - pip install build twine "setuptools_scm[toml]>=7.0"
+  - git fetch --tags --force || true
+  - echo "=== Git tags ==="
+  - git tag --list -l
+  - echo "=== setuptools_scm detected version ==="
+  - python -m setuptools_scm
 
 build:
   stage: build
   script:
-    # Отладка: какая версия сейчас видит setuptools_scm
-    - python -m setuptools_scm
     - python -m build
+    - echo "=== Содержимое dist/ ==="
+    - ls -la dist/
   artifacts:
     paths:
       - dist/
@@ -33,7 +37,7 @@ build:
 publish:
   stage: publish
   script:
-    - echo "=== Загружаем версию ==="
+    - echo "=== Загружаем ==="
     - ls -l dist/
     - TWINE_USERNAME=gitlab-ci-token
       TWINE_PASSWORD=${CI_JOB_TOKEN}
