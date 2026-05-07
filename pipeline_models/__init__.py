@@ -18,6 +18,7 @@ __all__ = [
     "FramePreprocessor",          # ← добавлено
     "MediaPipeFaceDetector",
     "BiometricPreprocessorPipeline",
+    "FaceGeometricNormalizer",
     "VideoInput",
     "PipelineContext",
     "PipelineStep",
