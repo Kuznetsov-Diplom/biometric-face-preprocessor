@@ -76,6 +76,19 @@ class BiometricPreprocessorPipeline:
                 return self._center_image(large_aligned)
             return np.zeros((*self._preview_size, 3), dtype=np.uint8)
 
+        elif preview_step == "temporal_landmarks_smoother":
+            if hasattr(context, 'aligned_face') and context.aligned_face is not None:
+                preview = context.aligned_face.copy()
+                if hasattr(context, 'smoothed_landmarks') and context.smoothed_landmarks is not None:
+                    # Рисуем сглаженные ландмарки (красные точки)
+                    for (x, y) in context.smoothed_landmarks.astype(int):
+                        cv2.circle(preview, (x, y), 2, (0, 0, 255), -1)   # красные точки
+                    # Опционально: соединяем в контур (для наглядности)
+                    cv2.polylines(preview, [context.smoothed_landmarks.astype(int)], False, (0, 255, 0), 1)
+                return preview
+            else:
+                return context.aligned_face if hasattr(context, 'aligned_face') else context.current_frame
+
         # fallback
         return cv2.resize(self.get_overlay_frame(context), self._preview_size)
 
