@@ -1,19 +1,19 @@
 import cv2
-# Надёжный импорт для Docker slim-образа (избегаем проблемы с mp.solutions)
-from mediapipe.python.solutions import face_detection as mp_face_detection
+import mediapipe as mp   # ← ОФИЦИАЛЬНЫЙ и самый надёжный импорт (работает в Docker, slim-образах и Streamlit)
 
 from .interfaces.pipeline_context import PipelineContext
 from .interfaces.pipeline_step import PipelineStep
 
 
 class MediaPipeFaceDetector(PipelineStep):
-    """Шаг пайплайна: детекция лица (MediaPipe) — полностью совместим с app.py"""
+    """Шаг пайплайна: детекция лица (MediaPipe) — полностью совместим с app.py из test.git"""
 
     def __init__(self, name: str = "face_detection", min_detection_confidence: float = 0.85):
         super().__init__(name=name, min_detection_confidence=min_detection_confidence)
         self.min_detection_confidence = min_detection_confidence
 
-        self.face_detection = mp_face_detection.FaceDetection(
+        # Официальный способ — mp.solutions (не ломается в production-окружениях)
+        self.face_detection = mp.solutions.face_detection.FaceDetection(
             model_selection=0,
             min_detection_confidence=min_detection_confidence
         )
