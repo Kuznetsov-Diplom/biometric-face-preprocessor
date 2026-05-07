@@ -4,7 +4,7 @@ stages:
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.pip-cache"
-  GIT_DEPTH: 0          # ← КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: полный клон + все теги
+  GIT_DEPTH: 0                  # ← обязательно для setuptools_scm
 
 cache:
   paths:
@@ -17,24 +17,26 @@ before_script:
   - python --version
   - pip install --upgrade pip
   - pip install build twine
-  # Дополнительная страховка (на случай, если GIT_DEPTH не сработает)
-  - git fetch --tags --force || true
+  - git fetch --tags --force     # ← дополнительная страховка
 
 build:
   stage: build
   script:
+    # Отладка: какая версия сейчас видит setuptools_scm
+    - python -m setuptools_scm
     - python -m build
   artifacts:
     paths:
       - dist/
     expire_in: 1 week
 
-# Публикуем пакет в GitLab Package Registry ТОЛЬКО при создании тега
 publish:
   stage: publish
   script:
+    - echo "=== Загружаем версию ==="
+    - ls -l dist/
     - TWINE_USERNAME=gitlab-ci-token
       TWINE_PASSWORD=${CI_JOB_TOKEN}
-      python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
+      python -m twine upload --verbose --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
   rules:
     - if: $CI_COMMIT_TAG
